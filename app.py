@@ -60,7 +60,14 @@ def popup_tarifs():
     Les prix varient selon la **rareté**, le **format** (intégralité, résumé) et le **type de course**. 
     Le tarif exact de chaque vidéo est affiché directement dans le catalogue et s'ajoute automatiquement à votre panier.
     """)
-
+    st.divider()
+    st.markdown("### 🎁 Remises au volume")
+    st.markdown("""
+    Pour les passionnés qui souhaitent revivre un Grand Tour entier ou se faire une belle collection de Classiques, des réductions s'appliquent automatiquement dans votre panier :
+    * 🥉 **Dès 5 vidéos :** -10% sur le total
+    * 🥈 **Dès 10 vidéos :** -15% sur le total
+    * 🥇 **Dès 20 vidéos :** -20% sur le total
+    """)
 # ==========================================
 # 3. CHARGEMENT DES DONNÉES
 # ==========================================

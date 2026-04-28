@@ -225,10 +225,11 @@ elif st.session_state.page == 'panier':
             go_home()
             st.rerun()
     else:
-        st.markdown(f"**Vous avez sélectionné {len(st.session_state.panier)} vidéo(s).**")
+        nb_articles = len(st.session_state.panier)
+        st.markdown(f"**Vous avez sélectionné {nb_articles} vidéo(s).**")
         st.write("---")
         
-        total_prix = 0
+        total_prix_brut = 0
         items_a_supprimer = []
         
         for i, match in enumerate(st.session_state.panier):
@@ -242,7 +243,7 @@ elif st.session_state.page == 'panier':
             prix = float(match.get('Prix vidéo', 3.0))
             
             with col_info:
-                txt_etape = f" - Etape {etape_m}" if str(etape_m).strip() and str(etape_m) != 'nan' else ""
+                txt_etape = f" - Etape {etape_m}" if str(etape_m).strip() and str(etape_m) not in ['nan', 'None'] else ""
                 st.markdown(f"🗓️ **{date_m}** | 🚴‍♂️ **{course_m}{txt_etape}**<br>🥇 Vainqueur : {vainqueur}", unsafe_allow_html=True)
             
             with col_prix:
@@ -253,7 +254,7 @@ elif st.session_state.page == 'panier':
                     items_a_supprimer.append(i)
             
             st.divider()
-            total_prix += prix
+            total_prix_brut += prix
                 
         # Exécution de la suppression
         if items_a_supprimer:
@@ -261,15 +262,40 @@ elif st.session_state.page == 'panier':
                 st.session_state.panier.pop(idx)
             st.rerun()
             
+        # ==================================
+        # CALCUL DE LA REMISE DÉGRESSIVE
+        # ==================================
+        remise_pct = 0
+        if nb_articles >= 20:
+            remise_pct = 20
+        elif nb_articles >= 10:
+            remise_pct = 15
+        elif nb_articles >= 5:
+            remise_pct = 10
+            
+        montant_remise = total_prix_brut * (remise_pct / 100.0)
+        total_final = total_prix_brut - montant_remise
+            
         st.subheader("💳 Récapitulatif")
-        st.markdown(f"### **Total à payer : {total_prix:.2f} €**")
+        
+        if remise_pct > 0:
+            st.markdown(f"**Sous-total brut :** {total_prix_brut:.2f} €")
+            st.success(f"🎁 **Remise volume appliquée (-{remise_pct}%) :** -{montant_remise:.2f} €")
+            
+        st.markdown(f"### **Total à payer : {total_final:.2f} €**")
         st.write("---")
         
         texte_recap = "Bonjour, je souhaite commander ces vidéos vues dans Le Grenier du Cyclisme :\n\n"
         for match in st.session_state.panier:
-            texte_recap += f"- {match.get('📅 Date', '?')} | {match.get('🚴‍♂️ Course', '')} (Vainqueur: {match.get('🥇 Vainqueur', '')}) - {match.get('Prix vidéo', '3')}€\n"
-        texte_recap += f"\nTotal d'articles : {len(st.session_state.panier)}"
-        texte_recap += f"\nMontant Total : {total_prix:.2f}€"
+            txt_etp = f" (Etape {match.get('🔢 Etape', '')})" if str(match.get('🔢 Etape', '')).strip() and str(match.get('🔢 Etape', '')) not in ['nan', 'None'] else ""
+            texte_recap += f"- {match.get('📅 Date', '?')} | {match.get('🚴‍♂️ Course', '')}{txt_etp} - {float(match.get('Prix vidéo', 3.0)):.2f}€\n"
+        
+        texte_recap += f"\nTotal d'articles : {nb_articles}"
+        if remise_pct > 0:
+            texte_recap += f"\nSous-total : {total_prix_brut:.2f}€"
+            texte_recap += f"\nRemise volume (-{remise_pct}%) : -{montant_remise:.2f}€"
+            
+        texte_recap += f"\nMontant Total : {total_final:.2f}€"
         
         st.markdown("Copiez le texte ci-dessous pour me l'envoyer par e-mail ou messagerie :")
         st.code(texte_recap, language="text")

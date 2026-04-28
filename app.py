@@ -198,7 +198,7 @@ elif st.session_state.page == 'faq':
         st.write("Le catalogue est mis à jour régulièrement. Si vous cherchez un 'Graal' précis (une étape oubliée, un critérium d'époque), contactez-moi par mail, je fouillerai mes cartons non encore répertoriés !")
 
 # ==========================================
-# PAGE : PANIER (MISE À JOUR ÉTAPE & TYPE)
+# PAGE : PANIER 
 # ==========================================
 elif st.session_state.page == 'panier':
     st.header("🛒 Mon Panier")
@@ -218,9 +218,17 @@ elif st.session_state.page == 'panier':
             c_i, c_p, c_b = st.columns([6, 2, 1])
             
             # --- LOGIQUE D'AFFICHAGE DYNAMIQUE ---
-            # 1. Gestion de l'étape
-            etp_val = str(m.get('🔢 Etape', '')).strip()
-            txt_etape = f" - Etape {etp_val}" if etp_val and etp_val.lower() not in ['nan', 'none', '0'] else ""
+            # 1. Gestion de l'étape (Correction des décimales type 9.0 -> 9)
+            raw_etape = m.get('🔢 Etape', '')
+            txt_etape = ""
+            if pd.notna(raw_etape) and str(raw_etape).strip() not in ['', 'nan', 'none', '0']:
+                try:
+                    # On convertit en nombre à virgule puis en entier pour couper le .0
+                    etp_clean = str(int(float(raw_etape)))
+                    txt_etape = f" - Etape {etp_clean}"
+                except ValueError:
+                    # Si c'est du texte (ex: "Prologue"), on laisse tel quel
+                    txt_etape = f" - Etape {str(raw_etape).strip()}"
             
             # 2. Gestion du Type (si Type de course == "Autre")
             txt_type = ""
@@ -256,9 +264,15 @@ elif st.session_state.page == 'panier':
         recap_intro = f"Bonjour, je souhaite commander ces {nb_a} vidéos sur Le Grenier du Cyclisme :\n\n"
         recap_items = ""
         for x in st.session_state.panier:
-            # On reprend la même logique pour le texte brut
-            e_v = str(x.get('🔢 Etape', '')).strip()
-            t_etp = f" (Etape {e_v})" if e_v and e_v.lower() not in ['nan', 'none', '0'] else ""
+            # Même logique pour le texte brut (enlever le .0)
+            raw_e = x.get('🔢 Etape', '')
+            t_etp = ""
+            if pd.notna(raw_e) and str(raw_e).strip() not in ['', 'nan', 'none', '0']:
+                try:
+                    e_clean = str(int(float(raw_e)))
+                    t_etp = f" (Etape {e_clean})"
+                except ValueError:
+                    t_etp = f" (Etape {str(raw_e).strip()})"
             
             t_typ = ""
             if x.get('Type de course') == "Autre":

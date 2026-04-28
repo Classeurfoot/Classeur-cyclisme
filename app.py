@@ -198,7 +198,7 @@ elif st.session_state.page == 'faq':
         st.write("Le catalogue est mis à jour régulièrement. Si vous cherchez un 'Graal' précis (une étape oubliée, un critérium d'époque), contactez-moi par mail, je fouillerai mes cartons non encore répertoriés !")
 
 # ==========================================
-# PAGE : PANIER 
+# PAGE : PANIER (MISE À JOUR FORMAT RÉCAP)
 # ==========================================
 elif st.session_state.page == 'panier':
     st.header("🛒 Mon Panier")
@@ -217,28 +217,23 @@ elif st.session_state.page == 'panier':
         for i, m in enumerate(st.session_state.panier):
             c_i, c_p, c_b = st.columns([6, 2, 1])
             
-            # --- LOGIQUE D'AFFICHAGE DYNAMIQUE ---
-            # 1. Gestion de l'étape (Correction des décimales type 9.0 -> 9)
+            # --- LOGIQUE D'AFFICHAGE ---
             raw_etape = m.get('🔢 Etape', '')
             txt_etape = ""
             if pd.notna(raw_etape) and str(raw_etape).strip() not in ['', 'nan', 'none', '0']:
                 try:
-                    # On convertit en nombre à virgule puis en entier pour couper le .0
                     etp_clean = str(int(float(raw_etape)))
                     txt_etape = f" - Etape {etp_clean}"
                 except ValueError:
-                    # Si c'est du texte (ex: "Prologue"), on laisse tel quel
                     txt_etape = f" - Etape {str(raw_etape).strip()}"
             
-            # 2. Gestion du Type (si Type de course == "Autre")
             txt_type = ""
             if m.get('Type de course') == "Autre":
                 type_val = m.get('🌄 Type', '')
-                if type_val:
-                    txt_type = f" [{type_val}]"
+                if type_val: txt_type = f" [{type_val}]"
             
-            # Affichage dans l'interface
-            c_i.markdown(f"**{m.get('🚴‍♂️ Course')}**{txt_etape}{txt_type}<br><small>Saison {m.get('📆 Saison')} | Vainqueur : {m.get('🥇 Vainqueur')}</small>", unsafe_allow_html=True)
+            # Affichage visuel dans le panier Streamlit
+            c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br>Vainqueur : {m.get('🥇 Vainqueur')}", unsafe_allow_html=True)
             c_p.write(f"**{m.get('Prix vidéo')} €**")
             
             if c_b.button("❌", key=f"del_{i}"):
@@ -257,34 +252,35 @@ elif st.session_state.page == 'panier':
         
         st.subheader(f"Total à payer : {total_final:.2f} €")
         
-        # --- GÉNÉRATION DU RÉCAP TEXTE POUR COPIE ---
+        # --- GÉNÉRATION DU RÉCAP TEXTE (FORMAT DEMANDÉ) ---
         st.write("---")
         st.markdown("📩 **Récapitulatif de la commande :**")
         
         recap_intro = f"Bonjour, je souhaite commander ces {nb_a} vidéos sur Le Grenier du Cyclisme :\n\n"
         recap_items = ""
+        
         for x in st.session_state.panier:
-            # Même logique pour le texte brut (enlever le .0)
+            # Nettoyage étape
             raw_e = x.get('🔢 Etape', '')
             t_etp = ""
             if pd.notna(raw_e) and str(raw_e).strip() not in ['', 'nan', 'none', '0']:
                 try:
                     e_clean = str(int(float(raw_e)))
-                    t_etp = f" (Etape {e_clean})"
+                    t_etp = f" - Etape {e_clean}"
                 except ValueError:
-                    t_etp = f" (Etape {str(raw_e).strip()})"
+                    t_etp = f" - Etape {str(raw_e).strip()}"
             
+            # Type si Autre
             t_typ = ""
             if x.get('Type de course') == "Autre":
                 val_t = x.get('🌄 Type', '')
                 if val_t: t_typ = f" [{val_t}]"
-                
-            recap_items += f"- {x.get('🚴‍♂️ Course')}{t_etp}{t_typ} {x.get('📆 Saison')} (Vainqueur: {x.get('🥇 Vainqueur')}) - {x.get('Prix vidéo')}€\n"
+            
+            # CONSTRUCTION DU BLOC (Course-Saison-Etape + Saut de ligne + Vainqueur)
+            recap_items += f"- {x.get('🚴‍♂️ Course')} - {x.get('📆 Saison')}{t_etp}{t_typ}\n"
+            recap_items += f"  Vainqueur : {x.get('🥇 Vainqueur')} - {x.get('Prix vidéo')}€\n\n"
         
-        recap_footer = f"\nSous-total : {tot_b:.2f}€"
-        if pct > 0:
-            recap_footer += f"\nRemise volume {pct}% : -{rem:.2f}€"
-        recap_footer += f"\nTOTAL FINAL : {total_final:.2f}€"
+        recap_footer = f"TOTAL FINAL : {total_final:.2f}€"
         
         st.code(recap_intro + recap_items + recap_footer)
         

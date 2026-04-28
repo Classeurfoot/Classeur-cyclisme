@@ -198,46 +198,82 @@ elif st.session_state.page == 'faq':
         st.write("Le catalogue est mis à jour régulièrement. Si vous cherchez un 'Graal' précis (une étape oubliée, un critérium d'époque), contactez-moi par mail, je fouillerai mes cartons non encore répertoriés !")
 
 # ==========================================
-# PAGE : PANIER (AVEC REMISE %)
+# PAGE : PANIER (MISE À JOUR ÉTAPE & TYPE)
 # ==========================================
 elif st.session_state.page == 'panier':
     st.header("🛒 Mon Panier")
     if not st.session_state.panier:
-        st.info("Panier vide.")
+        st.info("Votre panier est vide pour le moment.")
+        if st.button("Retourner à l'accueil"):
+            go_home()
+            st.rerun()
     else:
-        tot_b = sum(float(m.get('Prix vidéo', 3)) for m in st.session_state.panier)
         nb_a = len(st.session_state.panier)
+        tot_b = sum(float(m.get('Prix vidéo', 3)) for m in st.session_state.panier)
+        
+        st.markdown(f"**Vous avez sélectionné {nb_a} vidéo(s).**")
+        st.write("---")
         
         for i, m in enumerate(st.session_state.panier):
             c_i, c_p, c_b = st.columns([6, 2, 1])
-            c_i.write(f"**{m.get('🚴‍♂️ Course')}** ({m.get('📆 Saison')}) - {m.get('🥇 Vainqueur')}")
-            c_p.write(f"{m.get('Prix vidéo')} €")
+            
+            # --- LOGIQUE D'AFFICHAGE DYNAMIQUE ---
+            # 1. Gestion de l'étape
+            etp_val = str(m.get('🔢 Etape', '')).strip()
+            txt_etape = f" - Etape {etp_val}" if etp_val and etp_val.lower() not in ['nan', 'none', '0'] else ""
+            
+            # 2. Gestion du Type (si Type de course == "Autre")
+            txt_type = ""
+            if m.get('Type de course') == "Autre":
+                type_val = m.get('🌄 Type', '')
+                if type_val:
+                    txt_type = f" [{type_val}]"
+            
+            # Affichage dans l'interface
+            c_i.markdown(f"**{m.get('🚴‍♂️ Course')}**{txt_etape}{txt_type}<br><small>Saison {m.get('📆 Saison')} | Vainqueur : {m.get('🥇 Vainqueur')}</small>", unsafe_allow_html=True)
+            c_p.write(f"**{m.get('Prix vidéo')} €**")
+            
             if c_b.button("❌", key=f"del_{i}"):
-                st.session_state.panier.pop(i); st.rerun()
+                st.session_state.panier.pop(i)
+                st.rerun()
         
         st.divider()
+        
+        # --- CALCUL DES REMISES ---
         pct = 20 if nb_a >= 20 else (15 if nb_a >= 10 else (10 if nb_a >= 5 else 0))
         rem = tot_b * (pct/100)
+        total_final = tot_b - rem
         
         if pct > 0:
             st.success(f"🎁 Remise volume de {pct}% appliquée : -{rem:.2f}€")
         
-        st.subheader(f"Total : {tot_b - rem:.2f} €")
+        st.subheader(f"Total à payer : {total_final:.2f} €")
         
-        recap = f"Commande Grenier Cyclisme ({nb_a} vidéos) :\n" + "\n".join([f"- {x.get('🚴‍♂️ Course')} {x.get('📆 Saison')}" for x in st.session_state.panier])
-        st.code(recap)
-        if st.button("Vider le panier"): st.session_state.panier = []; st.rerun()
-
-# ==========================================
-# PAGES CATALOGUE & RECHERCHE (SIMPLIFIÉES)
-# ==========================================
-elif st.session_state.page == 'catalogue':
-    st.header("📚 Catalogue")
-    afficher_resultats(df)
-
-elif st.session_state.page == 'recherche_avancee':
-    st.header("🕵️ Recherche Avancée")
-    saisons = sorted(df['📆 Saison'].unique(), reverse=True)
-    f_s = st.multiselect("Saisons", saisons)
-    df_f = df[df['📆 Saison'].isin(f_s)] if f_s else df
-    afficher_resultats(df_f)
+        # --- GÉNÉRATION DU RÉCAP TEXTE POUR COPIE ---
+        st.write("---")
+        st.markdown("📩 **Récapitulatif de la commande :**")
+        
+        recap_intro = f"Bonjour, je souhaite commander ces {nb_a} vidéos sur Le Grenier du Cyclisme :\n\n"
+        recap_items = ""
+        for x in st.session_state.panier:
+            # On reprend la même logique pour le texte brut
+            e_v = str(x.get('🔢 Etape', '')).strip()
+            t_etp = f" (Etape {e_v})" if e_v and e_v.lower() not in ['nan', 'none', '0'] else ""
+            
+            t_typ = ""
+            if x.get('Type de course') == "Autre":
+                val_t = x.get('🌄 Type', '')
+                if val_t: t_typ = f" [{val_t}]"
+                
+            recap_items += f"- {x.get('🚴‍♂️ Course')}{t_etp}{t_typ} {x.get('📆 Saison')} (Vainqueur: {x.get('🥇 Vainqueur')}) - {x.get('Prix vidéo')}€\n"
+        
+        recap_footer = f"\nSous-total : {tot_b:.2f}€"
+        if pct > 0:
+            recap_footer += f"\nRemise volume {pct}% : -{rem:.2f}€"
+        recap_footer += f"\nTOTAL FINAL : {total_final:.2f}€"
+        
+        st.code(recap_intro + recap_items + recap_footer)
+        
+        if st.button("🗑️ Vider le panier"):
+            st.session_state.panier = []
+            st.rerun()

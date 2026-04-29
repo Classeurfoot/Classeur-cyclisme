@@ -258,6 +258,28 @@ if st.session_state.page == 'accueil':
     """, unsafe_allow_html=True)
     
     st.write("---")
+
+    # --- CSS POUR COLORER LES BOUTONS COMMANDES ET ÉCHANGES ---
+    st.markdown("""
+    <style>
+    /* 🟢 BOUTON COMMANDES (4ème colonne) */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(4) button {
+        background-color: #2e7d32 !important; border-color: #2e7d32 !important; transition: all 0.3s ease;
+    }
+    div[data-testid="stHorizontalBlock"] > div:nth-child(4) button p { color: #ffffff !important; font-weight: 600 !important; }
+    div[data-testid="stHorizontalBlock"] > div:nth-child(4) button:hover { background-color: #1b5e20 !important; border-color: #1b5e20 !important; transform: scale(1.02); }
+
+    /* 🔵 BOUTON ÉCHANGES (5ème colonne) */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(5) button {
+        background-color: #1565c0 !important; border-color: #1565c0 !important; transition: all 0.3s ease;
+    }
+    div[data-testid="stHorizontalBlock"] > div:nth-child(5) button p { color: #ffffff !important; font-weight: 600 !important; }
+    div[data-testid="stHorizontalBlock"] > div:nth-child(5) button:hover { background-color: #0d47a1 !important; border-color: #0d47a1 !important; transform: scale(1.02); }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # 5 BOUTONS INFOS
+    c1, c2, c3, c4, c5 = st.columns(5)
     
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1: 

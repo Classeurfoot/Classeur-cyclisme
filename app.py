@@ -605,3 +605,20 @@ elif st.session_state.page == 'progression':
         
     st.write("---")
     st.info("💡 *Ce tableau compte le nombre de Saisons annuelles couvertes par au moins une vidéo de l'épreuve dans le catalogue.*")
+
+# ==========================================
+# 🛑 PIED DE PAGE (FOOTER GLOBAL)
+# ==========================================
+st.write("---")
+
+foot_a, foot_b = st.columns([1, 1])
+
+with foot_a:
+    annee_actuelle = datetime.now().year
+    st.markdown(f"<br><p style='color: gray; font-size: 14px;'>© {annee_actuelle} - Le Grenier du Cyclisme<br><i>La mémoire de la petite reine.</i></p>", unsafe_allow_html=True)
+
+with foot_b:
+    st.markdown("**La Voiture Balai**")
+    st.markdown("✉️ [legrenierdufootball@hotmail.com](mailto:legrenierdufootball@hotmail.com)") # Mets ton vrai email ici
+    
+   

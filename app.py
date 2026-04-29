@@ -37,20 +37,30 @@ def go_home():
 # 🌳 L'ARBORESCENCE DU CYCLISME
 # ==========================================
 MENU_ARBO = {
-    "Grands Tours": ["Tour de France", "Giro", "Vuelta"],
-    "Les Classiques": {
-        "Les 5 Monuments": ["Milan-San Remo", "Tour des Flandres", "Paris-Roubaix", "Liège-Bastogne-Liège", "Tour de Lombardie"],
-        "Flandriennes & Pavés": ["E3", "Gand-Wevelgem", "Omloop", "Kuurne"],
-        "Ardennaises": ["Flèche Wallonne", "Amstel Gold Race", "Flèche Brabançonne"],
-        "Automne & Autres": ["Strade Bianche", "Clásica San Sebastián", "Paris-Tours", "Grand Prix de Plouay"]
+    "Grands Tours": [
+        "Giro d’Italia", "Tour de France", "Tour de France Femmes", 
+        "Vuelta a España", "Vuelta Femenina"
+    ],
+    "Les Monuments": [
+        "Milan-Sanremo", "Tour des Flandres", "Paris-Roubaix", 
+        "Liège-Bastogne-Liège", "Tour de Lombardie"
+    ],
+    "Classiques & Courses d'un jour": {
+        "Campagne Flandrienne & Pavés": ["Omloop Het Nieuwsblad", "Kuurne–Brussels–Kuurne", "Nokere Koerse", "GP Denain", "Bruges-La Panne", "E3 Saxo Classic", "Gand-Wevelgem", "A Travers la Flandre", "GP Escaut", "Tour de Drenthe"],
+        "Les Ardennaises": ["Flèche Brabançonne", "Amstel Gold Race", "Flèche Wallonne"],
+        "Italiennes & Chemins Blancs": ["Trofeo Laigueglia", "Strade Bianche", "Strade Bianche féminine", "Milan-Turin", "Coppa Sabatini", "Tour d'Emilie", "Tre Valli Varesine"],
+        "Le Calendrier Français": ["La Marseillaise", "Faun Ardèche Classic", "Faun Drôme Classic", "Cholet-Pays de la Loire", "Tro Bro Leon", "Bretagne Classic-GP Plouay", "Paris-Tours"],
+        "Les Internationales": ["Clásica Jaén", "Clásica San Sebastián", "Grand Prix Cycliste de Québec", "Grand Prix Cycliste de Montréal"]
     },
-    "Courses d'une semaine": {
-        "En France": ["Paris-Nice", "Critérium du Dauphiné", "4 Jours de Dunkerque", "Route d'Occitanie", "Tour de l'Ain"],
-        "En Italie": ["Tirreno-Adriatico", "Tour des Alpes"],
-        "En Espagne": ["Tour de Catalogne", "Tour du Pays Basque", "Tour d'Andalousie"],
-        "Autres Pays": ["Tour de Suisse", "Tour de Romandie", "Tour de Pologne"]
+    "Courses par étapes": {
+        "World Tour Historique": ["Paris-Nice", "Tirreno-Adriatico", "Tour de Catalogne", "Tour du Pays Basque", "Tour de Romandie", "Dauphiné Libéré", "Tour de Suisse"],
+        "Début de saison & Préparation": ["Etoile de Bessèges", "Tour de la Provence", "Tour d'Andalousie-Ruta del Sol", "Tour d'Algarve", "Gran Camino", "Tour des Alpes", "Tour des Abruzzes", "Tour de Belgique", "Tour de Slovénie", "Route d'Occitanie"],
+        "Internationales & Relève": ["UAE Tour", "Tour de Turquie", "Tour de l'Avenir"]
     },
-    "Championnats & JO": ["Championnat du Monde", "Jeux Olympiques", "Championnat d'Europe", "Championnat de France"]
+    "Mondiaux, Europe et JO": [
+        "Jeux Olympiques", "Championnats du Monde", 
+        "Championnats du Monde Espoirs", "Championnats d’Europe"
+    ]
 }
 
 # ==========================================
@@ -63,9 +73,10 @@ def popup_guide_contenu():
     
     **Dans ce catalogue massif :**
     * 💛 **Les Grands Tours :** Tour de France, Giro, Vuelta (étapes intégrales ou résumés longs).
-    * 🪨 **Les Classiques :** Les 5 Monuments et les semi-classiques.
-    * 🌈 **Championnats :** Courses en ligne et chronos.
-    * ⏱️ **Courses d'une semaine :** Paris-Nice, Dauphiné, etc.
+    * 🪨 **Les Monuments :** Les 5 grandes légendes d'un jour.
+    * 🍺 **Classiques :** Flandriennes, Ardennaises et courses régionales.
+    * ⏱️ **Courses par étapes :** De Paris-Nice au Dauphiné.
+    * 🌈 **Championnats :** Mondiaux, JO, courses en ligne et chronos.
     """)
 
 @st.dialog("💾 Formats & Qualité")
@@ -166,6 +177,10 @@ with st.sidebar:
     div.element-container:has(.css-tours) + div.element-container button p { color: white !important; font-weight: bold;}
     div.element-container:has(.css-tours) + div.element-container button:hover { background-color: #a16207 !important; border-color: #a16207 !important; transform: scale(1.02); }
 
+    div.element-container:has(.css-monuments) + div.element-container button { background-color: #3f3f46 !important; border-color: #3f3f46 !important; }
+    div.element-container:has(.css-monuments) + div.element-container button p { color: white !important; font-weight: bold;}
+    div.element-container:has(.css-monuments) + div.element-container button:hover { background-color: #27272a !important; border-color: #27272a !important; transform: scale(1.02); }
+
     div.element-container:has(.css-classiques) + div.element-container button { background-color: #52525b !important; border-color: #52525b !important; }
     div.element-container:has(.css-classiques) + div.element-container button p { color: white !important; font-weight: bold;}
     div.element-container:has(.css-classiques) + div.element-container button:hover { background-color: #3f3f46 !important; border-color: #3f3f46 !important; transform: scale(1.02); }
@@ -185,17 +200,21 @@ with st.sidebar:
     if st.button("💛 Grands Tours", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ['Grands Tours']; st.rerun()
         
+    st.markdown('<div class="css-monuments" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
+    if st.button("🪨 Les Monuments", use_container_width=True):
+        st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Monuments']; st.rerun()
+
     st.markdown('<div class="css-classiques" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("🪨 Les Classiques", use_container_width=True):
-        st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Classiques']; st.rerun()
+    if st.button("🍺 Classiques & 1 jour", use_container_width=True):
+        st.session_state.page = 'arborescence'; st.session_state.chemin = ["Classiques & Courses d'un jour"]; st.rerun()
         
     st.markdown('<div class="css-etapes" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("⏱️ Courses d'une semaine", use_container_width=True):
-        st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses d'une semaine"]; st.rerun()
+    if st.button("⏱️ Courses par étapes", use_container_width=True):
+        st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses par étapes"]; st.rerun()
         
     st.markdown('<div class="css-champ" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("🌈 Championnats & JO", use_container_width=True):
-        st.session_state.page = 'arborescence'; st.session_state.chemin = ['Championnats & JO']; st.rerun()
+    if st.button("🌈 Mondiaux, Europe & JO", use_container_width=True):
+        st.session_state.page = 'arborescence'; st.session_state.chemin = ['Mondiaux, Europe et JO']; st.rerun()
 
     st.divider()
     st.markdown("### 🔍 Outils")
@@ -259,18 +278,22 @@ if st.session_state.page == 'accueil':
         if st.button("💛 Les Grands Tours", use_container_width=True, key="btn_acc_tours"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ['Grands Tours']; st.rerun()
             
-        st.markdown('<div class="css-etapes" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("⏱️ Courses d'une semaine", use_container_width=True, key="btn_acc_etapes"):
-            st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses d'une semaine"]; st.rerun()
+        st.markdown('<div class="css-classiques" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
+        if st.button("🍺 Classiques & Courses d'un jour", use_container_width=True, key="btn_acc_classiques"):
+            st.session_state.page = 'arborescence'; st.session_state.chemin = ["Classiques & Courses d'un jour"]; st.rerun()
+
+        st.markdown('<div class="css-champ" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
+        if st.button("🌈 Mondiaux, Europe & JO", use_container_width=True, key="btn_acc_champ"):
+            st.session_state.page = 'arborescence'; st.session_state.chemin = ['Mondiaux, Europe et JO']; st.rerun()
 
     with col_cat2:
-        st.markdown('<div class="css-classiques" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("🪨 Les Classiques & Monuments", use_container_width=True, key="btn_acc_classiques"):
-            st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Classiques']; st.rerun()
-            
-        st.markdown('<div class="css-champ" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("🌈 Championnats & J.O", use_container_width=True, key="btn_acc_champ"):
-            st.session_state.page = 'arborescence'; st.session_state.chemin = ['Championnats & JO']; st.rerun()
+        st.markdown('<div class="css-monuments" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
+        if st.button("🪨 Les Monuments", use_container_width=True, key="btn_acc_monuments"):
+            st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Monuments']; st.rerun()
+
+        st.markdown('<div class="css-etapes" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
+        if st.button("⏱️ Courses par étapes", use_container_width=True, key="btn_acc_etapes"):
+            st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses par étapes"]; st.rerun()
 
 # ==========================================
 # PAGE : ARBORESCENCE (NAVIGATION DYNAMIQUE)
@@ -282,9 +305,10 @@ elif st.session_state.page == 'arborescence':
         cat_principale = st.session_state.chemin[0]
         c_fond, c_surv = "#333333", "#222222" # Défaut
         if cat_principale == "Grands Tours": c_fond, c_surv = "#ca8a04", "#a16207"
-        elif cat_principale == "Les Classiques": c_fond, c_surv = "#52525b", "#3f3f46"
-        elif cat_principale == "Courses d'une semaine": c_fond, c_surv = "#0284c7", "#0369a1"
-        elif cat_principale == "Championnats & JO": c_fond, c_surv = "#7e22ce", "#6b21a8"
+        elif cat_principale == "Les Monuments": c_fond, c_surv = "#3f3f46", "#27272a"
+        elif cat_principale == "Classiques & Courses d'un jour": c_fond, c_surv = "#52525b", "#3f3f46"
+        elif cat_principale == "Courses par étapes": c_fond, c_surv = "#0284c7", "#0369a1"
+        elif cat_principale == "Mondiaux, Europe et JO": c_fond, c_surv = "#7e22ce", "#6b21a8"
 
         st.markdown(f"""
         <style>
@@ -363,7 +387,7 @@ elif st.session_state.page == 'panier':
         for i, m in enumerate(st.session_state.panier):
             c_i, c_p, c_b = st.columns([6, 2, 1])
             
-            # Gestion Etape
+            # --- LOGIQUE D'AFFICHAGE ---
             raw_etape = m.get('🔢 Etape', '')
             txt_etape = ""
             if pd.notna(raw_etape) and str(raw_etape).strip() not in ['', 'nan', 'none', '0']:
@@ -373,12 +397,12 @@ elif st.session_state.page == 'panier':
                 except ValueError:
                     txt_etape = f" - Etape {str(raw_etape).strip()}"
             
-            # Gestion Type
             txt_type = ""
             if m.get('Type de course') == "Autre":
                 type_val = m.get('🌄 Type', '')
                 if type_val: txt_type = f" [{type_val}]"
             
+            # Affichage visuel dans le panier Streamlit
             c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br>Vainqueur : {m.get('🥇 Vainqueur')}", unsafe_allow_html=True)
             c_p.write(f"**{m.get('Prix vidéo')} €**")
             
@@ -388,21 +412,25 @@ elif st.session_state.page == 'panier':
         
         st.divider()
         
-        # Remises
+        # --- CALCUL DES REMISES ---
         pct = 20 if nb_a >= 20 else (15 if nb_a >= 10 else (10 if nb_a >= 5 else 0))
         rem = tot_b * (pct/100)
         total_final = tot_b - rem
         
         if pct > 0:
             st.success(f"🎁 Remise volume de {pct}% appliquée : -{rem:.2f}€")
+        
         st.subheader(f"Total à payer : {total_final:.2f} €")
         
+        # --- GÉNÉRATION DU RÉCAP TEXTE (FORMAT DEMANDÉ) ---
         st.write("---")
         st.markdown("📩 **Récapitulatif de la commande :**")
+        
         recap_intro = f"Bonjour, je souhaite commander ces {nb_a} vidéos sur Le Grenier du Cyclisme :\n\n"
         recap_items = ""
         
         for x in st.session_state.panier:
+            # Nettoyage étape
             raw_e = x.get('🔢 Etape', '')
             t_etp = ""
             if pd.notna(raw_e) and str(raw_e).strip() not in ['', 'nan', 'none', '0']:
@@ -412,19 +440,23 @@ elif st.session_state.page == 'panier':
                 except ValueError:
                     t_etp = f" - Etape {str(raw_e).strip()}"
             
+            # Type si Autre
             t_typ = ""
             if x.get('Type de course') == "Autre":
                 val_t = x.get('🌄 Type', '')
                 if val_t: t_typ = f" [{val_t}]"
             
+            # CONSTRUCTION DU BLOC (Course-Saison-Etape + Saut de ligne + Vainqueur)
             recap_items += f"- {x.get('🚴‍♂️ Course')} - {x.get('📆 Saison')}{t_etp}{t_typ}\n"
             recap_items += f"  Vainqueur : {x.get('🥇 Vainqueur')} - {x.get('Prix vidéo')}€\n\n"
         
         recap_footer = f"TOTAL FINAL : {total_final:.2f}€"
+        
         st.code(recap_intro + recap_items + recap_footer)
         
         if st.button("🗑️ Vider le panier"):
-            st.session_state.panier = []; st.rerun()
+            st.session_state.panier = []
+            st.rerun()
 
 # ==========================================
 # PAGE : FAQ

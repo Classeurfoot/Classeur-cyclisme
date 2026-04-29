@@ -63,8 +63,7 @@ MENU_ARBO = {
     ]
 }
 
-# --- NOUVEAU : DICTIONNAIRE DE TRADUCTION POUR LA RECHERCHE ---
-# Capte les différentes façons dont c'est écrit dans ton fichier Excel
+# --- DICTIONNAIRE DE TRADUCTION POUR LA RECHERCHE ---
 MAPPING_RECHERCHE = {
     "Giro d’Italia": "Giro",
     "Vuelta a España": "Vuelta",
@@ -121,10 +120,10 @@ def popup_tarifs():
 @st.dialog("✉️ Contact & Commandes")
 def popup_contact_commandes():
     st.markdown("""
-    1. 🛒 **Le Panier :** Ajoutez vos étapes.
-    2. ✉️ **L'envoi :** Copiez le récapitulatif et envoyez-le moi.
+    1. 🛒 **Le Panier :** Ajoutez vos étapes ou courses préférées.
+    2. ✉️ **L'envoi :** Copiez le récapitulatif et envoyez-le par e-mail à **legrenierdufootball@hotmail.com** (ou via Instagram).
     3. 💳 **Le Paiement :** Via **PayPal** de manière sécurisée.
-    4. 🚀 **La Livraison :** Lien de téléchargement privé sous 24/48h.
+    4. 🚀 **La Livraison :** Lien de téléchargement privé envoyé rapidement.
     """)
 
 @st.dialog("🤝 Proposer un Échange")
@@ -149,7 +148,6 @@ def load_data():
 
 df = load_data()
 
-# AJOUT DU "LEADER GÉNÉRAL" DANS LES COLONNES VISIBLES
 cols_cat = [c for c in ['📆 Saison', '🚴‍♂️ Course', '📅 Date', '🔢 Etape', '🥇 Vainqueur', '👑 Leader général', 'Format vidéo', '📺 Diffuseur', 'Prix vidéo'] if c in df.columns]
 
 # --- AFFICHAGE RESULTATS ---
@@ -232,6 +230,7 @@ with st.sidebar:
     st.markdown("### 🔍 Outils")
     if st.button("📖 Catalogue Complet", use_container_width=True): st.session_state.page = 'catalogue'; st.rerun()
     if st.button("📊 Statistiques", use_container_width=True): st.session_state.page = 'statistiques'; st.rerun()
+    if st.button("🎯 Progression Collection", use_container_width=True): st.session_state.page = 'progression'; st.rerun()
     if st.button("🕵️ Recherche Avancée", use_container_width=True): st.session_state.page = 'recherche_avancee'; st.rerun()
 
 # ==========================================
@@ -258,7 +257,7 @@ if st.session_state.page == 'accueil':
     """, unsafe_allow_html=True)
     
     st.write("---")
-
+    
     # --- CSS POUR COLORER LES BOUTONS COMMANDES ET ÉCHANGES ---
     st.markdown("""
     <style>
@@ -277,10 +276,7 @@ if st.session_state.page == 'accueil':
     div[data-testid="stHorizontalBlock"] > div:nth-child(5) button:hover { background-color: #0d47a1 !important; border-color: #0d47a1 !important; transform: scale(1.02); }
     </style>
     """, unsafe_allow_html=True)
-    
-    # 5 BOUTONS INFOS
-    c1, c2, c3, c4, c5 = st.columns(5)
-    
+
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1: 
         if st.button("🧭 Guide", use_container_width=True): popup_guide_contenu()
@@ -301,6 +297,26 @@ if st.session_state.page == 'accueil':
         st.write(f"**Résultats pour :** '{q}'")
         afficher_resultats(df[m])
         st.write("---")
+
+    # 📅 L'ÉPHÉMÉRIDE DU PELOTON
+    st.markdown("### 📅 L'Éphéméride du Peloton")
+    aujourdhui = datetime.now()
+    mois_francais = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+    date_affichee = f"{aujourdhui.day} {mois_francais[aujourdhui.month - 1]}"
+    
+    if '📅 Date' in df.columns:
+        df['Mois_Jour'] = pd.to_datetime(df['📅 Date'], errors='coerce').dt.strftime('%m-%d')
+        jour_cible = aujourdhui.strftime('%m-%d')
+        df_ephem = df[df['Mois_Jour'] == jour_cible]
+        
+        if not df_ephem.empty:
+            st.success(f"🔥 **{len(df_ephem)} course(s)** ont eu lieu un {date_affichee} dans l'Histoire !")
+            with st.expander(f"Voir les {len(df_ephem)} vidéos du {date_affichee}"):
+                afficher_resultats(df_ephem)
+        else:
+            st.info(f"Que s'est-il passé un {date_affichee} ? Le peloton se reposait, aucune course répertoriée à cette date.")
+            
+    st.write("---")
 
     st.markdown("### 📂 Explorer le Grenier par Catégorie")
     col_cat1, col_cat2 = st.columns(2)
@@ -388,14 +404,10 @@ elif st.session_state.page == 'arborescence':
                             st.session_state.chemin.append(element)
                             st.rerun()
 
-    # MOTEUR DE RECHERCHE CORRIGÉ (Prend en compte les accents et les abréviations)
     elif isinstance(noeud_actuel, str):
         st.header(f"🏁 {noeud_actuel}")
         
-        # On regarde si on a une traduction pour ce nom, sinon on prend le nom normal
         terme_recherche = MAPPING_RECHERCHE.get(noeud_actuel, noeud_actuel)
-        
-        # La recherche s'effectue sur le vrai terme du CSV (regex=True permet d'utiliser le "OU" mathématique |)
         mask = df['🚴‍♂️ Course'].astype(str).str.contains(terme_recherche, case=False, na=False, regex=True)
         df_final = df[mask]
         afficher_resultats(df_final)
@@ -434,13 +446,11 @@ elif st.session_state.page == 'panier':
                 type_val = m.get('🌄 Type', '')
                 if type_val: txt_type = f" [{type_val}]"
 
-            # NOUVEAU : GESTION DU LEADER
             txt_leader = ""
             val_leader = str(m.get('👑 Leader général', '')).strip()
             if val_leader and val_leader.lower() not in ['nan', 'none', '0', '']:
                 txt_leader = f" | Leader : {val_leader}"
             
-            # Affichage dans l'interface
             c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br><small>Vainqueur : {m.get('🥇 Vainqueur')}{txt_leader}</small>", unsafe_allow_html=True)
             c_p.write(f"**{m.get('Prix vidéo')} €**")
             
@@ -480,7 +490,6 @@ elif st.session_state.page == 'panier':
                 val_t = x.get('🌄 Type', '')
                 if val_t: t_typ = f" [{val_t}]"
 
-            # NOUVEAU : LEADER DANS LE TEXTE DE COMMANDE
             t_leader = ""
             l_val = str(x.get('👑 Leader général', '')).strip()
             if l_val and l_val.lower() not in ['nan', 'none', '0', '']:
@@ -515,7 +524,7 @@ elif st.session_state.page == 'faq':
         st.write("Le catalogue est mis à jour régulièrement. Si vous cherchez un 'Graal' précis (une étape oubliée, un critérium d'époque), contactez-moi par mail, je fouillerai mes cartons non encore répertoriés !")
 
 # ==========================================
-# PAGES CATALOGUE & RECHERCHE & STATS
+# PAGES CATALOGUE, RECHERCHE, STATS, PROGRESSION
 # ==========================================
 elif st.session_state.page == 'catalogue':
     st.header("📚 Catalogue Complet")
@@ -563,19 +572,36 @@ elif st.session_state.page == 'statistiques':
             fig_course.update_layout(yaxis={'categoryorder':'total ascending'}, yaxis_title="")
             st.plotly_chart(fig_course, use_container_width=True)
 
-# ==========================================
-# 🛑 PIED DE PAGE (FOOTER GLOBAL)
-# ==========================================
-st.write("---")
+elif st.session_state.page == 'progression':
+    st.header("🎯 Progression de la Collection")
+    st.markdown("<p style='color: gray; font-size:16px;'>L'objectif ultime : archiver l'histoire intégrale des plus grandes courses du monde.</p>", unsafe_allow_html=True)
+    st.divider()
 
-foot_a, foot_b = st.columns([1, 1])
+    tdf_eds = df[df['🚴‍♂️ Course'].astype(str).str.contains('Tour de France', case=False, na=False)]['📆 Saison'].nunique() if '🚴‍♂️ Course' in df.columns else 0
+    giro_eds = df[df['🚴‍♂️ Course'].astype(str).str.contains('Giro', case=False, na=False)]['📆 Saison'].nunique() if '🚴‍♂️ Course' in df.columns else 0
+    vuelta_eds = df[df['🚴‍♂️ Course'].astype(str).str.contains('Vuelta', case=False, na=False)]['📆 Saison'].nunique() if '🚴‍♂️ Course' in df.columns else 0
+    roub_eds = df[df['🚴‍♂️ Course'].astype(str).str.contains('Roubaix', case=False, na=False)]['📆 Saison'].nunique() if '🚴‍♂️ Course' in df.columns else 0
+    flandres_eds = df[df['🚴‍♂️ Course'].astype(str).str.contains('Flandres', case=False, na=False)]['📆 Saison'].nunique() if '🚴‍♂️ Course' in df.columns else 0
 
-with foot_a:
-    annee_actuelle = datetime.now().year
-    st.markdown(f"<br><p style='color: gray; font-size: 14px;'>© {annee_actuelle} - Le Grenier du Cyclisme 2026<br><i>La mémoire de la petite reine.</i></p>", unsafe_allow_html=True)
-
-with foot_b:
-    st.markdown("**La Voiture Balai (Contact & Réseaux)**")
-    st.markdown("✉️ [legrenierdufootball@hotmail.com](mailto:legrenierdufootball@hotmail.com)") # Mets ton vrai email ici
-    
-   
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### 🏔️ Grands Tours")
+        st.markdown(f"**Tour de France** ({tdf_eds}/110 éditions historiques)")
+        st.progress(min(1.0, tdf_eds / 110.0))
+        
+        st.markdown(f"**Giro d'Italia** ({giro_eds}/106 éditions)")
+        st.progress(min(1.0, giro_eds / 106.0))
+        
+        st.markdown(f"**Vuelta a España** ({vuelta_eds}/78 éditions)")
+        st.progress(min(1.0, vuelta_eds / 78.0))
+        
+    with col2:
+        st.markdown("### 🏛️ Les Monuments Pavés")
+        st.markdown(f"**Paris-Roubaix** ({roub_eds}/120 éditions)")
+        st.progress(min(1.0, roub_eds / 120.0))
+        
+        st.markdown(f"**Tour des Flandres** ({flandres_eds}/107 éditions)")
+        st.progress(min(1.0, flandres_eds / 107.0))
+        
+    st.write("---")
+    st.info("💡 *Ce tableau compte le nombre de Saisons annuelles couvertes par au moins une vidéo de l'épreuve dans le catalogue.*")

@@ -615,7 +615,7 @@ foot_a, foot_b = st.columns([1, 1])
 
 with foot_a:
     annee_actuelle = datetime.now().year
-    st.markdown(f"<br><p style='color: gray; font-size: 14px;'>© {annee_actuelle} - Le Grenier du Cyclisme<br><i>La mémoire de la petite reine.</i></p>", unsafe_allow_html=True)
+    st.markdown(f"<br><p style='color: gray; font-size: 14px;'>© {annee_actuelle} - Le Grenier du Cyclisme - 2026<br><i>La mémoire de la petite reine.</i></p>", unsafe_allow_html=True)
 
 with foot_b:
     st.markdown("**La Voiture Balai**")

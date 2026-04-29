@@ -532,17 +532,38 @@ elif st.session_state.page == 'catalogue':
 
 elif st.session_state.page == 'recherche_avancee':
     st.header("🕵️ Recherche Avancée")
+    
+    # 1. Extraction et tri des listes uniques pour les menus déroulants
     saisons = sorted(df['📆 Saison'].dropna().unique(), reverse=True)
     courses = sorted(df['🚴‍♂️ Course'].dropna().unique())
-    c1, c2 = st.columns(2)
-    with c1: f_s = st.multiselect("Saisons", saisons)
-    with c2: f_c = st.multiselect("Courses", courses)
+    # On gère le cas où des vainqueurs seraient manquants ou mal formatés
+    vainqueurs = sorted(df['🥇 Vainqueur'].dropna().astype(str).unique())
     
-    df_f = df.copy()
-    if f_s: df_f = df_f[df_f['📆 Saison'].isin(f_s)]
-    if f_c: df_f = df_f[df_f['🚴‍♂️ Course'].isin(f_c)]
-    afficher_resultats(df_f)
+    # On nettoie la liste des vainqueurs (retirer les '0', 'nan', etc.)
+    vainqueurs_propres = [v for v in vainqueurs if v.lower() not in ['0', 'nan', 'none', 'inconnu']]
 
+    # 2. Affichage des filtres sur 3 colonnes pour que ce soit harmonieux
+    c1, c2, c3 = st.columns(3)
+    with c1: 
+        f_s = st.multiselect("🗓️ Saisons", saisons)
+    with c2: 
+        f_c = st.multiselect("🚴‍♂️ Courses", courses)
+    with c3: 
+        f_v = st.multiselect("🥇 Vainqueur", vainqueurs_propres)
+    
+    # 3. Application des filtres sur les données
+    df_f = df.copy()
+    if f_s: 
+        df_f = df_f[df_f['📆 Saison'].isin(f_s)]
+    if f_c: 
+        df_f = df_f[df_f['🚴‍♂️ Course'].isin(f_c)]
+    if f_v: 
+        df_f = df_f[df_f['🥇 Vainqueur'].astype(str).isin(f_v)]
+        
+    st.write("---")
+    
+    # 4. Affichage du résultat final
+    afficher_resultats(df_f)
 elif st.session_state.page == 'statistiques':
     st.header("📊 Le Tableau de Bord du Peloton")
     st.write("---")

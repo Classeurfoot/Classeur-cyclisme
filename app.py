@@ -63,6 +63,17 @@ MENU_ARBO = {
     ]
 }
 
+# --- NOUVEAU : DICTIONNAIRE DE TRADUCTION POUR LA RECHERCHE ---
+# Permet de garder un beau nom dans le menu, mais de chercher le vrai nom du fichier CSV
+MAPPING_RECHERCHE = {
+    "Giro d’Italia": "Giro",
+    "Vuelta a España": "Vuelta",
+    "Grand Prix Cycliste de Québec": "GP Quebec",
+    "Grand Prix Cycliste de Montréal": "GP Montreal",
+    "E3 Saxo Classic": "GP E3", # Au cas où c'est écrit "GP E3" dans le CSV
+    "Bretagne Classic-GP Plouay": "GP Plouay"
+}
+
 # ==========================================
 # ⚙️ FONCTIONS DES POP-UPS (INFORMATIONS)
 # ==========================================
@@ -170,7 +181,6 @@ with st.sidebar:
     st.divider()
     st.markdown("<h3 style='margin-bottom: -10px;'>📂 Catégories</h3>", unsafe_allow_html=True)
     
-    # CSS pour colorer les boutons d'arborescence (Sidebar & Accueil)
     st.markdown("""
     <style>
     div.element-container:has(.css-tours) + div.element-container button { background-color: #ca8a04 !important; border-color: #ca8a04 !important; }
@@ -195,7 +205,6 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
 
-    # Boutons colorés Sidebar
     st.markdown('<div class="css-tours" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
     if st.button("💛 Grands Tours", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ['Grands Tours']; st.rerun()
@@ -247,7 +256,6 @@ if st.session_state.page == 'accueil':
     
     st.write("---")
     
-    # 5 BOUTONS INFOS
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1: 
         if st.button("🧭 Guide", use_container_width=True): popup_guide_contenu()
@@ -269,7 +277,6 @@ if st.session_state.page == 'accueil':
         afficher_resultats(df[m])
         st.write("---")
 
-    # BOUTONS CATÉGORIES (ARBORESCENCE) EN PAGE D'ACCUEIL
     st.markdown("### 📂 Explorer le Grenier par Catégorie")
     col_cat1, col_cat2 = st.columns(2)
     
@@ -300,10 +307,9 @@ if st.session_state.page == 'accueil':
 # ==========================================
 elif st.session_state.page == 'arborescence':
     
-    # Injection CSS dynamique pour colorer les sous-menus en fonction du choix principal
     if len(st.session_state.chemin) > 0:
         cat_principale = st.session_state.chemin[0]
-        c_fond, c_surv = "#333333", "#222222" # Défaut
+        c_fond, c_surv = "#333333", "#222222"
         if cat_principale == "Grands Tours": c_fond, c_surv = "#ca8a04", "#a16207"
         elif cat_principale == "Les Monuments": c_fond, c_surv = "#3f3f46", "#27272a"
         elif cat_principale == "Classiques & Courses d'un jour": c_fond, c_surv = "#52525b", "#3f3f46"
@@ -318,7 +324,6 @@ elif st.session_state.page == 'arborescence':
         </style>
         """, unsafe_allow_html=True)
 
-    # Déterminer où on se trouve dans l'arbre
     noeud_actuel = MENU_ARBO
     for etape in st.session_state.chemin:
         if isinstance(noeud_actuel, dict): noeud_actuel = noeud_actuel.get(etape, noeud_actuel)
@@ -335,7 +340,6 @@ elif st.session_state.page == 'arborescence':
         
     st.divider()
     
-    # Affichage d'un Dictionnaire (Sous-catégories)
     if isinstance(noeud_actuel, dict):
         cles = list(noeud_actuel.keys())
         for i in range(0, len(cles), 3):
@@ -348,7 +352,6 @@ elif st.session_state.page == 'arborescence':
                             st.session_state.chemin.append(cle)
                             st.rerun()
 
-    # Affichage d'une Liste (Dernier palier avant la course)
     elif isinstance(noeud_actuel, list):
         for i in range(0, len(noeud_actuel), 3):
             cols = st.columns(3)
@@ -360,10 +363,15 @@ elif st.session_state.page == 'arborescence':
                             st.session_state.chemin.append(element)
                             st.rerun()
 
-    # Si c'est le nom final (Chaîne de texte), on filtre les résultats
+    # --- LE MOTEUR DE RECHERCHE CORRIGÉ ---
     elif isinstance(noeud_actuel, str):
         st.header(f"🏁 {noeud_actuel}")
-        mask = df['🚴‍♂️ Course'].str.contains(noeud_actuel, case=False, na=False)
+        
+        # On regarde si on a une traduction pour ce nom, sinon on prend le nom normal
+        terme_recherche = MAPPING_RECHERCHE.get(noeud_actuel, noeud_actuel)
+        
+        # La recherche s'effectue sur le vrai terme du CSV
+        mask = df['🚴‍♂️ Course'].str.contains(terme_recherche, case=False, na=False)
         df_final = df[mask]
         afficher_resultats(df_final)
 
@@ -387,7 +395,6 @@ elif st.session_state.page == 'panier':
         for i, m in enumerate(st.session_state.panier):
             c_i, c_p, c_b = st.columns([6, 2, 1])
             
-            # --- LOGIQUE D'AFFICHAGE ---
             raw_etape = m.get('🔢 Etape', '')
             txt_etape = ""
             if pd.notna(raw_etape) and str(raw_etape).strip() not in ['', 'nan', 'none', '0']:
@@ -402,7 +409,6 @@ elif st.session_state.page == 'panier':
                 type_val = m.get('🌄 Type', '')
                 if type_val: txt_type = f" [{type_val}]"
             
-            # Affichage visuel dans le panier Streamlit
             c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br>Vainqueur : {m.get('🥇 Vainqueur')}", unsafe_allow_html=True)
             c_p.write(f"**{m.get('Prix vidéo')} €**")
             
@@ -412,7 +418,6 @@ elif st.session_state.page == 'panier':
         
         st.divider()
         
-        # --- CALCUL DES REMISES ---
         pct = 20 if nb_a >= 20 else (15 if nb_a >= 10 else (10 if nb_a >= 5 else 0))
         rem = tot_b * (pct/100)
         total_final = tot_b - rem
@@ -422,7 +427,6 @@ elif st.session_state.page == 'panier':
         
         st.subheader(f"Total à payer : {total_final:.2f} €")
         
-        # --- GÉNÉRATION DU RÉCAP TEXTE (FORMAT DEMANDÉ) ---
         st.write("---")
         st.markdown("📩 **Récapitulatif de la commande :**")
         
@@ -430,7 +434,6 @@ elif st.session_state.page == 'panier':
         recap_items = ""
         
         for x in st.session_state.panier:
-            # Nettoyage étape
             raw_e = x.get('🔢 Etape', '')
             t_etp = ""
             if pd.notna(raw_e) and str(raw_e).strip() not in ['', 'nan', 'none', '0']:
@@ -440,13 +443,11 @@ elif st.session_state.page == 'panier':
                 except ValueError:
                     t_etp = f" - Etape {str(raw_e).strip()}"
             
-            # Type si Autre
             t_typ = ""
             if x.get('Type de course') == "Autre":
                 val_t = x.get('🌄 Type', '')
                 if val_t: t_typ = f" [{val_t}]"
             
-            # CONSTRUCTION DU BLOC (Course-Saison-Etape + Saut de ligne + Vainqueur)
             recap_items += f"- {x.get('🚴‍♂️ Course')} - {x.get('📆 Saison')}{t_etp}{t_typ}\n"
             recap_items += f"  Vainqueur : {x.get('🥇 Vainqueur')} - {x.get('Prix vidéo')}€\n\n"
         
@@ -465,13 +466,15 @@ elif st.session_state.page == 'faq':
     st.header("❓ Foire Aux Questions & Infos")
     st.write("---")
     with st.expander("📺 D'où proviennent ces archives cyclistes ?"):
-        st.write("Ces vidéos sont issues d'une collection personnelle bâtie sur des années...")
+        st.write("Ces vidéos sont issues d'une collection personnelle bâtie sur des années : enregistrements TV d'époque (VHS), numérisations de DVD officiels et échanges entre passionnés internationaux. C'est un travail de mémoire pour ne pas oublier les exploits du passé.")
     with st.expander("🎞️ Quelle est la qualité des images ?"):
-        st.write("Pour les courses des années 70 à 90, l'image possède le grain typique de l'époque...")
+        st.write("Pour les courses des années 70 à 90, l'image possède le grain typique de l'époque (SD). C'est ce qui fait le charme du rétro ! Les fichiers DVD (.VOB) offrent la meilleure qualité possible sans compression supplémentaire. Les années 2010+ sont généralement disponibles en bien meilleure résolution.")
     with st.expander("🎙️ Y a-t-il les commentaires en français ?"):
-        st.write("La majorité des archives possède des commentaires en français...")
+        st.write("La majorité des archives possède des commentaires en français (Antenne 2, France TV, Eurosport). Cependant, certaines raretés (Giro ou courses belges anciennes) peuvent être en italien ou en flamand. C'est précisé dans la colonne 'Langue/Diffuseur'.")
     with st.expander("💳 Comment se déroule le paiement et la livraison ?"):
-        st.write("Le paiement se fait par PayPal. Dès réception, je vous envoie un lien de téléchargement sécurisé...")
+        st.write("Une fois votre panier validé, le paiement se fait par PayPal. Dès réception, je vous envoie un lien de téléchargement sécurisé (SwissTransfer ou WeTransfer). Attention, les liens sont temporaires (7 à 30 jours), pensez à sauvegarder vos fichiers sur votre disque dur !")
+    with st.expander("🔄 Je cherche une étape précise qui n'est pas dans la liste..."):
+        st.write("Le catalogue est mis à jour régulièrement. Si vous cherchez un 'Graal' précis (une étape oubliée, un critérium d'époque), contactez-moi par mail, je fouillerai mes cartons non encore répertoriés !")
 
 # ==========================================
 # PAGES CATALOGUE & RECHERCHE & STATS

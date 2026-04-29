@@ -64,14 +64,15 @@ MENU_ARBO = {
 }
 
 # --- NOUVEAU : DICTIONNAIRE DE TRADUCTION POUR LA RECHERCHE ---
-# Permet de garder un beau nom dans le menu, mais de chercher le vrai nom du fichier CSV
+# Capte les différentes façons dont c'est écrit dans ton fichier Excel
 MAPPING_RECHERCHE = {
     "Giro d’Italia": "Giro",
     "Vuelta a España": "Vuelta",
-    "Grand Prix Cycliste de Québec": "GP Quebec",
-    "Grand Prix Cycliste de Montréal": "GP Montreal",
-    "E3 Saxo Classic": "GP E3", # Au cas où c'est écrit "GP E3" dans le CSV
-    "Bretagne Classic-GP Plouay": "GP Plouay"
+    "Grand Prix Cycliste de Québec": "Québec|Quebec",
+    "Grand Prix Cycliste de Montréal": "Montréal|Montreal",
+    "E3 Saxo Classic": "E3", 
+    "Bretagne Classic-GP Plouay": "Plouay",
+    "Milan-Sanremo": "San Remo|Sanremo"
 }
 
 # ==========================================
@@ -83,11 +84,11 @@ def popup_guide_contenu():
     **Bienvenue dans l'antre du Grenier du Cyclisme !** Plus de 2100 archives pour revivre la légende du peloton.
     
     **Dans ce catalogue massif :**
-    * 💛 **Les Grands Tours :** Tour de France, Giro, Vuelta (étapes intégrales ou résumés longs).
-    * 🪨 **Les Monuments :** Les 5 grandes légendes d'un jour.
-    * 🍺 **Classiques :** Flandriennes, Ardennaises et courses régionales.
-    * ⏱️ **Courses par étapes :** De Paris-Nice au Dauphiné.
-    * 🌈 **Championnats :** Mondiaux, JO, courses en ligne et chronos.
+    * 🏔️ **Les Grands Tours :** Tour de France, Giro, Vuelta (étapes intégrales ou résumés longs).
+    * 🏛️ **Les Monuments :** Les 5 grandes légendes d'un jour.
+    * 🧱 **Classiques :** Flandriennes, Ardennaises et courses régionales.
+    * 🛣️ **Courses par étapes :** De Paris-Nice au Dauphiné.
+    * 🌍 **Championnats :** Mondiaux, JO, courses en ligne et chronos.
     """)
 
 @st.dialog("💾 Formats & Qualité")
@@ -147,7 +148,9 @@ def load_data():
         return pd.DataFrame()
 
 df = load_data()
-cols_cat = [c for c in ['📆 Saison', '🚴‍♂️ Course', '📅 Date', '🔢 Etape', '🥇 Vainqueur', 'Format vidéo', '📺 Diffuseur', 'Prix vidéo'] if c in df.columns]
+
+# AJOUT DU "LEADER GÉNÉRAL" DANS LES COLONNES VISIBLES
+cols_cat = [c for c in ['📆 Saison', '🚴‍♂️ Course', '📅 Date', '🔢 Etape', '🥇 Vainqueur', '👑 Leader général', 'Format vidéo', '📺 Diffuseur', 'Prix vidéo'] if c in df.columns]
 
 # --- AFFICHAGE RESULTATS ---
 def afficher_resultats(df_res):
@@ -206,23 +209,23 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="css-tours" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("💛 Grands Tours", use_container_width=True):
+    if st.button("🏔️ Grands Tours", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ['Grands Tours']; st.rerun()
         
     st.markdown('<div class="css-monuments" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("🪨 Les Monuments", use_container_width=True):
+    if st.button("🏛️ Les Monuments", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Monuments']; st.rerun()
 
     st.markdown('<div class="css-classiques" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("🍺 Classiques & 1 jour", use_container_width=True):
+    if st.button("🧱 Classiques & 1 jour", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ["Classiques & Courses d'un jour"]; st.rerun()
         
     st.markdown('<div class="css-etapes" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("⏱️ Courses par étapes", use_container_width=True):
+    if st.button("🛣️ Courses par étapes", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses par étapes"]; st.rerun()
         
     st.markdown('<div class="css-champ" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-    if st.button("🌈 Mondiaux, Europe & JO", use_container_width=True):
+    if st.button("🌍 Mondiaux, Europe & JO", use_container_width=True):
         st.session_state.page = 'arborescence'; st.session_state.chemin = ['Mondiaux, Europe et JO']; st.rerun()
 
     st.divider()
@@ -282,24 +285,24 @@ if st.session_state.page == 'accueil':
     
     with col_cat1:
         st.markdown('<div class="css-tours" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("💛 Les Grands Tours", use_container_width=True, key="btn_acc_tours"):
+        if st.button("🏔️ Les Grands Tours", use_container_width=True, key="btn_acc_tours"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ['Grands Tours']; st.rerun()
             
         st.markdown('<div class="css-classiques" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("🍺 Classiques & Courses d'un jour", use_container_width=True, key="btn_acc_classiques"):
+        if st.button("🧱 Classiques & Courses d'un jour", use_container_width=True, key="btn_acc_classiques"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ["Classiques & Courses d'un jour"]; st.rerun()
 
         st.markdown('<div class="css-champ" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("🌈 Mondiaux, Europe & JO", use_container_width=True, key="btn_acc_champ"):
+        if st.button("🌍 Mondiaux, Europe & JO", use_container_width=True, key="btn_acc_champ"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ['Mondiaux, Europe et JO']; st.rerun()
 
     with col_cat2:
         st.markdown('<div class="css-monuments" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("🪨 Les Monuments", use_container_width=True, key="btn_acc_monuments"):
+        if st.button("🏛️ Les Monuments", use_container_width=True, key="btn_acc_monuments"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ['Les Monuments']; st.rerun()
 
         st.markdown('<div class="css-etapes" style="margin-bottom: -15px;"></div>', unsafe_allow_html=True)
-        if st.button("⏱️ Courses par étapes", use_container_width=True, key="btn_acc_etapes"):
+        if st.button("🛣️ Courses par étapes", use_container_width=True, key="btn_acc_etapes"):
             st.session_state.page = 'arborescence'; st.session_state.chemin = ["Courses par étapes"]; st.rerun()
 
 # ==========================================
@@ -363,15 +366,15 @@ elif st.session_state.page == 'arborescence':
                             st.session_state.chemin.append(element)
                             st.rerun()
 
-    # --- LE MOTEUR DE RECHERCHE CORRIGÉ ---
+    # MOTEUR DE RECHERCHE CORRIGÉ (Prend en compte les accents et les abréviations)
     elif isinstance(noeud_actuel, str):
         st.header(f"🏁 {noeud_actuel}")
         
         # On regarde si on a une traduction pour ce nom, sinon on prend le nom normal
         terme_recherche = MAPPING_RECHERCHE.get(noeud_actuel, noeud_actuel)
         
-        # La recherche s'effectue sur le vrai terme du CSV
-        mask = df['🚴‍♂️ Course'].str.contains(terme_recherche, case=False, na=False)
+        # La recherche s'effectue sur le vrai terme du CSV (regex=True permet d'utiliser le "OU" mathématique |)
+        mask = df['🚴‍♂️ Course'].astype(str).str.contains(terme_recherche, case=False, na=False, regex=True)
         df_final = df[mask]
         afficher_resultats(df_final)
 
@@ -408,8 +411,15 @@ elif st.session_state.page == 'panier':
             if m.get('Type de course') == "Autre":
                 type_val = m.get('🌄 Type', '')
                 if type_val: txt_type = f" [{type_val}]"
+
+            # NOUVEAU : GESTION DU LEADER
+            txt_leader = ""
+            val_leader = str(m.get('👑 Leader général', '')).strip()
+            if val_leader and val_leader.lower() not in ['nan', 'none', '0', '']:
+                txt_leader = f" | Leader : {val_leader}"
             
-            c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br>Vainqueur : {m.get('🥇 Vainqueur')}", unsafe_allow_html=True)
+            # Affichage dans l'interface
+            c_i.markdown(f"**{m.get('🚴‍♂️ Course')} - {m.get('📆 Saison')}{txt_etape}**{txt_type}<br><small>Vainqueur : {m.get('🥇 Vainqueur')}{txt_leader}</small>", unsafe_allow_html=True)
             c_p.write(f"**{m.get('Prix vidéo')} €**")
             
             if c_b.button("❌", key=f"del_{i}"):
@@ -447,9 +457,15 @@ elif st.session_state.page == 'panier':
             if x.get('Type de course') == "Autre":
                 val_t = x.get('🌄 Type', '')
                 if val_t: t_typ = f" [{val_t}]"
+
+            # NOUVEAU : LEADER DANS LE TEXTE DE COMMANDE
+            t_leader = ""
+            l_val = str(x.get('👑 Leader général', '')).strip()
+            if l_val and l_val.lower() not in ['nan', 'none', '0', '']:
+                t_leader = f" (Leader : {l_val})"
             
             recap_items += f"- {x.get('🚴‍♂️ Course')} - {x.get('📆 Saison')}{t_etp}{t_typ}\n"
-            recap_items += f"  Vainqueur : {x.get('🥇 Vainqueur')} - {x.get('Prix vidéo')}€\n\n"
+            recap_items += f"  Vainqueur : {x.get('🥇 Vainqueur')}{t_leader} - {x.get('Prix vidéo')}€\n\n"
         
         recap_footer = f"TOTAL FINAL : {total_final:.2f}€"
         

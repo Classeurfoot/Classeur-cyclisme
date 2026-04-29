@@ -562,3 +562,20 @@ elif st.session_state.page == 'statistiques':
             fig_course.update_traces(textposition='outside', textfont=dict(weight='bold'))
             fig_course.update_layout(yaxis={'categoryorder':'total ascending'}, yaxis_title="")
             st.plotly_chart(fig_course, use_container_width=True)
+
+# ==========================================
+# 🛑 PIED DE PAGE (FOOTER GLOBAL)
+# ==========================================
+st.write("---")
+
+foot_a, foot_b = st.columns([1, 1])
+
+with foot_a:
+    annee_actuelle = datetime.now().year
+    st.markdown(f"<br><p style='color: gray; font-size: 14px;'>© {annee_actuelle} - Le Grenier du Cyclisme 2026<br><i>La mémoire de la petite reine.</i></p>", unsafe_allow_html=True)
+
+with foot_b:
+    st.markdown("**La Voiture Balai (Contact & Réseaux)**")
+    st.markdown("✉️ [legrenierdufootball@hotmail.com](mailto:legrenierdufootball@hotmail.com)") # Mets ton vrai email ici
+    
+   

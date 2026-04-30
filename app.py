@@ -148,7 +148,7 @@ def load_data():
 
 df = load_data()
 
-cols_cat = [c for c in ['📆 Saison', '🚴‍♂️ Course', '📅 Date', '🔢 Etape', '🌄 Type', '🥇 Vainqueur', '👑 Leader général', 'Format vidéo', '📺 Diffuseur', 'Prix vidéo'] if c in df.columns]
+cols_cat = [c for c in ['📆 Saison', '🚴‍♂️ Course', '📅 Date', '🔢 Etape', '🏁 Ville d'arrivée', 🌄 Type', '🥇 Vainqueur', '👑 Leader général', 'Format vidéo', '📺 Diffuseur', 'Prix vidéo'] if c in df.columns]
 
 # --- AFFICHAGE RESULTATS ---
 def afficher_resultats(df_res):

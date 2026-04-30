@@ -155,13 +155,13 @@ def afficher_resultats(df_res):
     if df_res.empty: return st.warning("Aucun résultat.")
     st.metric("Vidéos trouvées", len(df_res))
     
-    # 1. Tri chronologique (de la saison la plus récente à la plus ancienne)
-    if '📆 Saison' in df_res.columns:
-        df_res = df_res.sort_values(by=['📆 Saison', '🔢 Etape'], ascending=[False, True], na_position='last')
+    # 1. Tri : Saison (récent en premier) > Course (alphabétique) > Etape (ordre chrono)
+    if all(col in df_res.columns for col in ['📆 Saison', '🚴‍♂️ Course', '🔢 Etape']):
+        df_res = df_res.sort_values(by=['📆 Saison', '🚴‍♂️ Course', '🔢 Etape'], ascending=[False, True, True], na_position='last')
         
     df_disp = df_res[cols_cat].copy()
     
-    # 2. Tableau intelligent : on masque les colonnes 100% vides (ex: 'Etape' pour les classiques)
+    # 2. Tableau intelligent : on masque les colonnes 100% vides
     df_disp = df_disp.dropna(axis=1, how='all')
     
     # 3. Affichage

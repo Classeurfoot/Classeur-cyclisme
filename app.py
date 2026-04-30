@@ -71,7 +71,9 @@ MAPPING_RECHERCHE = {
     "Grand Prix Cycliste de Montréal": "Montréal|Montreal",
     "E3 Saxo Classic": "E3", 
     "Bretagne Classic-GP Plouay": "Plouay",
-    "Milan-Sanremo": "San Remo|Sanremo"
+    "Milan-Sanremo": "San Remo|Sanremo",
+    # On autorise "Championnat" (singulier ou pluriel) MAIS on exclut strictement "Espoirs"
+    "Championnats du Monde": r"Championnat[s]? du Monde(?!.*Espoirs)"
 }
 
 # ==========================================
